@@ -1,140 +1,83 @@
-import os
-import json
-from enum import Enum
+# Lista que armazenará os ativos em memória
+ativos = []
 
-# --- REQUISITO 2: Estrutura de dados de enumeração para os tipos de ativos ---
-class TipoAtivo(Enum):
-    NOTEBOOK = 1
-    SERVIDOR = 2
-    ROTEADOR = 3
-    SISTEMA_WEB = 4
 
-ARQUIVO_BD = "base_ativos.txt"
-
-def carregar_dados():
-    """Carrega os dados do arquivo de texto."""
-    if not os.path.exists(ARQUIVO_BD):
-        return {}
-    try:
-        with open(ARQUIVO_BD, 'r', encoding='utf-8') as arquivo:
-            return json.load(arquivo)
-    except json.JSONDecodeError:
-        return {}
-
-def salvar_dados(dados):
-    """Salva os dados no arquivo de texto."""
-    with open(ARQUIVO_BD, 'w', encoding='utf-8') as arquivo:
-        json.dump(dados, arquivo, indent=4, ensure_ascii=False)
-
-# --- REQUISITO 3: Função de cadastro de ativo ---
 def cadastrar_ativo():
-    print("\n--- CADASTRO DE NOVO ATIVO ---")
-    dados = carregar_dados()
-    
-    # Tratamento de erro para o Identificador (deve ser inteiro)
+    print("\n--- CADASTRO DE ATIVO ---")
+
+    # Validação do ID
     while True:
         try:
-            id_ativo = int(input("Identificador único (ID numérico): "))
-            if str(id_ativo) in dados:
-                print("Erro: Já existe um ativo cadastrado com este ID.")
-                continue
+            id_ativo = int(input("Digite o ID do ativo: "))
             break
         except ValueError:
-            print("Erro: O ID deve ser um número inteiro. Tente novamente.")
+            print("Erro: o ID deve ser um número inteiro.")
 
-    # Validação de campos vazios
-    nome = input("Nome ou Hostname: ").strip()
-    while not nome:
-        print("Erro: O nome não pode ficar vazio.")
-        nome = input("Nome ou Hostname: ").strip()
-
-    responsavel = input("Responsável pelo ativo: ").strip()
-    setor = input("Setor ou Localização: ").strip()
-
-    # Seleção do Tipo de Ativo
-    print("\nTipos de Ativos Disponíveis:")
-    for tipo in TipoAtivo:
-        print(f"[{tipo.value}] {tipo.name.replace('_', ' ')}")
-    
+    # Validação do nome
     while True:
-        try:
-            tipo_opcao = int(input("Escolha o código do tipo de ativo: "))
-            tipo_ativo = TipoAtivo(tipo_opcao).name
+        nome = input("Digite o nome do equipamento: ").strip()
+        if nome:
             break
-        except ValueError:
-            print("Erro: Opção inválida. Digite o número correspondente ao tipo.")
+        print("Erro: o nome não pode ficar vazio.")
 
-    # Inserção de vulnerabilidades
-    vulnerabilidades = []
-    print("\nCadastro de Vulnerabilidades (deixe em branco e pressione Enter para finalizar):")
+    # Validação do responsável
     while True:
-        vuln = input("- Descrição da vulnerabilidade: ").strip()
-        if not vuln:
+        responsavel = input("Digite o responsável: ").strip()
+        if responsavel:
             break
-        vulnerabilidades.append(vuln)
+        print("Erro: o responsável não pode ficar vazio.")
 
-    # Montando o dicionário do ativo
-    novo_ativo = {
+    # Cria o dicionário do ativo
+    ativo = {
+        "id": id_ativo,
         "nome": nome,
-        "responsavel": responsavel,
-        "setor": setor,
-        "tipo": tipo_ativo,
-        "vulnerabilidades": vulnerabilidades
+        "responsavel": responsavel
     }
 
-    # Salvando no "banco de dados"
-    dados[str(id_ativo)] = novo_ativo
-    salvar_dados(dados)
-    print(f"\nSucesso: Ativo '{nome}' cadastrado com sucesso!")
+    # Adiciona na lista
+    ativos.append(ativo)
+
+    print("\nAtivo cadastrado com sucesso!")
 
 
 def listar_ativos():
-    dados = carregar_dados()
+    print("\n--- LISTA DE ATIVOS ---")
 
-    if not dados:
-        print("\nNenhum ativo cadastrado.")
+    if len(ativos) == 0:
+        print("Não há ativos cadastrados.")
         return
 
-    print("\n--- ATIVOS CADASTRADOS ---")
-
-    for id_ativo, ativo in dados.items():
-        print(f"\nID: {id_ativo}")
+    for ativo in ativos:
+        print("\n-------------------------")
+        print(f"ID: {ativo['id']}")
         print(f"Nome: {ativo['nome']}")
-        print(f"Tipo: {ativo['tipo']}")
         print(f"Responsável: {ativo['responsavel']}")
-        print(f"Setor: {ativo['setor']}")
-
-        print("Vulnerabilidades:")
-
-        if ativo["vulnerabilidades"]:
-            for vuln in ativo["vulnerabilidades"]:
-                print(f" - {vuln}")
-        else:
-            print(" - Nenhuma vulnerabilidade cadastrada")
-            
 
 
-# --- REQUISITO 1: Menu textual com tratamento de erros ---
 def exibir_menu():
     while True:
-        print("\n" + "="*40)
-        print("SISTEMA DE INVENTÁRIO DE CIBERSEGURANÇA")
-        print("="*40)
-        print("1. Cadastrar Ativo")
-        print("2. Listar Ativos")
-        print("3. Sair")
-        
+        print("\n" + "=" * 40)
+        print("SISTEMA DE CADASTRO DE ATIVOS DE TI")
+        print("=" * 40)
+        print("1 - Cadastrar ativo")
+        print("2 - Listar ativos")
+        print("3 - Sair")
+
         opcao = input("\nEscolha uma opção: ").strip()
 
-        if opcao == '1':
-             cadastrar_ativo()
+        if opcao == "1":
+            cadastrar_ativo()
 
-        elif opcao == '2':
+        elif opcao == "2":
             listar_ativos()
 
-        elif opcao == '3':
-            print("Encerrando...")
+        elif opcao == "3":
+            print("Programa encerrado.")
             break
 
+        else:
+            print("Opção inválida. Tente novamente.")
+
+
 if __name__ == "__main__":
-    exibir_menu()   
+    exibir_menu()
